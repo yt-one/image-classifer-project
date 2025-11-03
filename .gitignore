@@ -1,0 +1,39 @@
+# 或者使用更简洁的递归方式
+**/__pycache__/
+
+# 同时忽略 .pyc 文件
+*.pyc
+*.pyo
+*.pyd
+
+# 其他Python相关文件
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+*.manifest
+*.spec
+
+# 虚拟环境
+venv/
+ENV/
+
+# IDE文件
+.vscode/
+.idea/
+*.swp
+*.swo
