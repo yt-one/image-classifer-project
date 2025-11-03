@@ -36,7 +36,7 @@ class FlowerDataset(Dataset):
 
         if self.transform:
             img = self.transform(img)
-        return img, label
+        return img, label, path_img  # 返回多了图片路径 （bad case分析）
 
     def __len__(self): # 知道长度
         if len(self.img_info) == 0:

@@ -1,12 +1,11 @@
 from collections import Counter
-
 import numpy as np
 import torch
 
 
 class ModelTrainer:
     @staticmethod
-    def train(data_loader, model, loss_f, optimizer, epoch_idx, device, log_interval, max_epoch):
+    def train(data_loader, model, loss_f, optimizer, epoch_idx, device, log_interval, max_epoch, logger):
         model.train()
 
         class_num = data_loader.dataset.cls_num
@@ -18,11 +17,12 @@ class ModelTrainer:
         label_list = []
 
         for i, data in enumerate(data_loader):
-            _, label = data
-            label_list.extend(label.tolist())
+            # _, labels = data
+            inputs, labels, path_imgs = data
+            label_list.extend(labels.tolist())
 
             # inputs, labels, path_imgs = data
-            inputs, labels = data
+            # inputs, labels = data
             inputs = inputs.to(device)
             labels = labels.to(device)
 
@@ -45,20 +45,24 @@ class ModelTrainer:
                 pre_i = predicted[j].cpu().numpy()
                 conf_mat[cate_i, pre_i] += 1.
 
+                # 记录错误样本的信息
+                if cate_i != pre_i:
+                    path_error.append((cate_i, pre_i, path_imgs[j]))
+
             acc_avg = conf_mat.trace() / conf_mat.sum()
 
             # 输出 iteration 级训练信息
             if i % log_interval == log_interval - 1:
-                print(
+                logger.info(
                     "Training: Epoch[{:0>3}/{:0>3}] Iteration[{:0>3}/{:0>3}] Loss:{:.4f} Acc:{:.2%}".format(
                         epoch_idx + 1, max_epoch, i + 1, len(data_loader), loss_mean, acc_avg
                     )
                 )
-        print("epoch{} sampler: {}".format(epoch_idx, Counter(label_list)))
+        logger.info("epoch{} sampler: {}".format(epoch_idx, Counter(label_list)))
         return loss_mean, acc_avg, conf_mat, path_error
 
     @staticmethod
-    def valid(data_loader, model, loss_f, device):
+    def valid(data_loader, model, loss_f, device, logger):
         model.eval()
 
         class_num = data_loader.dataset.cls_num
@@ -67,8 +71,8 @@ class ModelTrainer:
         path_error = []
 
         for i, data in enumerate(data_loader):
-            inputs, label = data
-            inputs, label = inputs.to(device), label.to(device)
+            inputs, label, _ = data
+            inputs, label= inputs.to(device), label.to(device)
 
             outputs = model(inputs)
             loss = loss_f(outputs, label)
@@ -79,12 +83,12 @@ class ModelTrainer:
             _, predicted = torch.max(outputs.data, 1)
             for j in range(len(label)):
                 cate_i = label[j].cpu().numpy()
-                pre_i = predicted[j].cpu().numpy()
+                pre_i = (predicted[j].cpu().numpy())
                 conf_mat[cate_i, pre_i] += 1.
 
         # 计算平均损失与准确率
         loss_mean = np.mean(loss_sigma)
         acc_avg = conf_mat.trace() / conf_mat.sum()
 
-        print("Valid: Loss:{:.4f} Acc:{:.2%}".format(loss_mean, acc_avg))
+        logger.info("Valid: Loss:{:.4f} Acc:{:.2%}".format(loss_mean, acc_avg))
         return loss_mean, acc_avg, conf_mat, path_error
