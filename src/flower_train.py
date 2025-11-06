@@ -12,10 +12,9 @@ from datetime import datetime
 import torch
 from torch import optim, nn
 from torch.utils.data import DataLoader
-from torchvision.models import resnet18
 
 from datasets.flower_102 import FlowerDataset
-from tools.common_tools import setup_seed, check_data_dir, Logger, show_confMat, plot_line
+from tools.common_tools import setup_seed, check_data_dir, Logger, show_confMat, plot_line, get_model
 from tools.model_trainer import ModelTrainer
 from config.flower_config import cfg
 
@@ -64,19 +63,9 @@ if __name__ == '__main__':
 
 
     # 2. 模型
-    model = resnet18()
-    path_state_dict = r"D:\Learn\Datasets\flowers102\pretrained_model\resnet18-f37072fd.pth"
-    if os.path.exists(path_state_dict):
-        pretrained_state_dict = torch.load(path_state_dict, map_location="cuda:0")
-        model.load_state_dict(pretrained_state_dict)
-        logger.info(f"load pretrained model!")
-    else:
-        logger.info(f"the pretrained model path {path_state_dict} does not exist!")
-
-    # 修改最后一层
-    num_ftrs = model.fc.in_features
-    model.fc = nn.Linear(num_ftrs, train_data.cls_num)  # 102
+    model = get_model(cfg, FlowerDataset.cls_num, logger)
     model.to(device)
+
 
     # 3. 损失函数，优化器
     loss_f = nn.CrossEntropyLoss()

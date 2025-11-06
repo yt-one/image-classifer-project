@@ -5,6 +5,9 @@ import torch
 import os
 
 from matplotlib import pyplot as plt
+from torch import nn
+from torchvision.models import resnet18, vgg16_bn
+from models.se_resnet import se_resnet50
 
 
 def setup_seed(seed=12345):
@@ -123,3 +126,60 @@ class Logger:
         logger.addHandler(console_handler)
 
         return logger
+
+
+
+def get_model(cfg, cls_num, logger):
+    model_name = cfg.model_name.lower()  # 从配置中取模型名
+    logger.info(f"Creating model: {model_name}")
+
+    if model_name == "resnet18":
+        model = resnet18(num_classes=cls_num)
+        path_state_dict = cfg.path_resnet18
+
+        if os.path.exists(path_state_dict):
+            pretrained_state_dict = torch.load(path_state_dict)
+            model.load_state_dict(pretrained_state_dict)
+            logger.info(f"load pretrained model!")
+        else:
+            logger.info(f"the pretrained model path {path_state_dict} does not exist!")
+
+        # 修改最后一层
+        num_ftrs = model.fc.in_features
+        model.fc = nn.Linear(num_ftrs, cls_num)
+
+    elif model_name == "vgg16_bn":
+        model = vgg16_bn(num_classes=cls_num)
+        path_state_dict = cfg.path_vgg16_bn
+
+        if os.path.exists(path_state_dict):
+            pretrained_state_dict = torch.load(path_state_dict)
+            model.load_state_dict(pretrained_state_dict)
+            logger.info(f"load pretrained model!")
+        else:
+            logger.info(f"the pretrained model path {path_state_dict} does not exist!")
+
+        # 修改最后一层
+        num_ftrs = model.classifier[-1].in_features
+        model.classifier[-1] = nn.Linear(num_ftrs, cls_num)
+
+    elif model_name == 'se_resnet50':
+        model = se_resnet50(num_classes=cls_num)
+        path_state_dict = cfg.path_se_res50
+
+        if os.path.exists(path_state_dict):
+            pretrained_state_dict = torch.load(path_state_dict)
+            model.load_state_dict(pretrained_state_dict)
+            logger.info(f"load pretrained model!")
+        else:
+            logger.info(f"the pretrained model path {path_state_dict} does not exist!")
+
+        # 修改最后一层
+        num_ftrs = model.fc.in_features
+        model.fc = nn.Linear(num_ftrs, cls_num)
+    else:
+        raise ValueError(f"Unsupported model: {model_name}")
+
+
+
+    return model
