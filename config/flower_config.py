@@ -49,6 +49,9 @@ cfg.max_epoch = 50
 
 cfg.log_interval = 10
 
+cfg.mixup = True
+cfg.mixup_alpha = 1
+
 norm_mean = [0.485, 0.456, 0.406] # imagenet 120万图像统计得来
 norm_std = [0.229, 0.224, 0.225]
 normTransform = transforms.Normalize(norm_mean, norm_std)

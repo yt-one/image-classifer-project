@@ -2,6 +2,9 @@ from collections import Counter
 import numpy as np
 import torch
 
+from config.flower_config import cfg
+from tools.mixup import mixup_data, mixup_criterion
+
 
 class ModelTrainer:
     @staticmethod
@@ -26,10 +29,18 @@ class ModelTrainer:
             inputs = inputs.to(device)
             labels = labels.to(device)
 
+            if cfg.mixup:
+                mixed_inputs, label_a, label_b, lam = mixup_data(inputs, labels, cfg.mixup_alpha, device)
+                inputs = mixed_inputs
+
             # forward & backward
             outputs = model(inputs)
             optimizer.zero_grad()
-            loss = loss_f(outputs, labels) # outputs.cpu(), labels.cpu()
+            if cfg.mixup:
+                loss = mixup_criterion(loss_f, outputs, label_a, label_b, lam) #  # outputs.cpu(), labels.cpu()
+            else:
+                loss = loss_f(outputs, labels)
+                
             loss.backward()
             optimizer.step()
 
