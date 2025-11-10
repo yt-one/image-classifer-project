@@ -52,6 +52,9 @@ cfg.log_interval = 10
 cfg.mixup = True
 cfg.mixup_alpha = 1
 
+cfg.label_smooth = True
+cfg.label_smooth_eps = 0.9
+
 norm_mean = [0.485, 0.456, 0.406] # imagenet 120万图像统计得来
 norm_std = [0.229, 0.224, 0.225]
 normTransform = transforms.Normalize(norm_mean, norm_std)

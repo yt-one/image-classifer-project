@@ -5,6 +5,8 @@ import sys
 
 import numpy as np
 
+from tools.my_loss import LabelSmoothingLoss
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # 得到当前py文件所在的目录，不管在哪里运行
 sys.path.append(os.path.join(BASE_DIR, '..'))  # 添加自定义包的路径
 
@@ -68,7 +70,10 @@ if __name__ == '__main__':
 
 
     # 3. 损失函数，优化器
-    loss_f = nn.CrossEntropyLoss()
+    if cfg.label_smooth:
+        loss_f = LabelSmoothingLoss(smoothing=cfg.label_smooth_eps)
+    else:
+        loss_f = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=cfg.lr_init, momentum=cfg.momentum, weight_decay=cfg.weight_decay)
     scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=cfg.milestones, gamma=cfg.factor)
 
