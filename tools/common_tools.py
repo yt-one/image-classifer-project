@@ -134,7 +134,7 @@ def get_model(cfg, cls_num, logger):
     logger.info(f"Creating model: {model_name}")
 
     if model_name == "resnet18":
-        model = resnet18(num_classes=cls_num)
+        model = resnet18()
         path_state_dict = cfg.path_resnet18
 
         if os.path.exists(path_state_dict):
@@ -149,7 +149,7 @@ def get_model(cfg, cls_num, logger):
         model.fc = nn.Linear(num_ftrs, cls_num)
 
     elif model_name == "vgg16_bn":
-        model = vgg16_bn(num_classes=cls_num)
+        model = vgg16_bn()
         path_state_dict = cfg.path_vgg16_bn
 
         if os.path.exists(path_state_dict):
@@ -164,7 +164,7 @@ def get_model(cfg, cls_num, logger):
         model.classifier[-1] = nn.Linear(num_ftrs, cls_num)
 
     elif model_name == 'se_resnet50':
-        model = se_resnet50(num_classes=cls_num)
+        model = se_resnet50()
         path_state_dict = cfg.path_se_res50
 
         if os.path.exists(path_state_dict):
