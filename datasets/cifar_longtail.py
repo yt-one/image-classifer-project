@@ -13,7 +13,6 @@ class CifarDataset(Dataset):
         self.root_dir = root_dir
         self.transform = transform
         self.img_info = []  # 定义list用于存储样本路径、标签
-        self.train_targets = []
 
         self._get_img_info()
 
@@ -55,7 +54,6 @@ class CifarDataset(Dataset):
 
         # 将数据顺序打乱
         random.shuffle(self.img_info)
-        self.train_targets = [int(label) for p, label in self.img_info]
 
 class CifarLTDataset(CifarDataset):
     def __init__(self, root_dir, transform=None, imb_factor=0.01, isTrain=True):
