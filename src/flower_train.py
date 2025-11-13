@@ -16,7 +16,7 @@ from torch import optim, nn
 from torch.utils.data import DataLoader
 
 from datasets.flower_102 import FlowerDataset
-from tools.common_tools import setup_seed, check_data_dir, Logger, show_confMat, plot_line, get_model
+from tools.common_tools import setup_seed, check_data_dir, Logger, show_confMat, plot_line, get_model, make_logger
 from tools.model_trainer import ModelTrainer
 from config.flower_config import cfg
 
@@ -36,28 +36,14 @@ cfg.train_bs = args.bs if args.bs else cfg.train_bs
 cfg.max_epoch = args.max_epoch if args.max_epoch else cfg.max_epoch
 
 if __name__ == '__main__':
-    now_time = datetime.now()
-    time_str = datetime.strftime(now_time, "%m-%d_%H-%M")
-    log_dir = os.path.join(BASE_DIR, "..", "..", "results", time_str) # 根据config中的创建时间作为文件夹名
-    if not os.path.exists(log_dir):
-        os.makedirs(log_dir)
-
     train_dir = os.path.join(args.data_root_dir, "train")
     valid_dir = os.path.join(args.data_root_dir, "valid")
     check_data_dir(train_dir)  # 检查数据路径是否存在，不存在提前报错
     check_data_dir(valid_dir)
 
-    # 创建log文件夹
-    now_time = datetime.now()
-    time_str = datetime.strftime(now_time, "%m-%d_%H-%M")
-    log_dir = os.path.join(BASE_DIR, "..", "..", "results", time_str)
-    if not os.path.exists(log_dir):
-        os.makedirs(log_dir)
-
     # 创建logger
-    path_log = os.path.join(log_dir, "log.log")
-    logger = Logger(path_log)
-    logger = logger.init_logger()
+    log_dir = os.path.join(BASE_DIR, "..", "..", "results")
+    logger, log_dir = make_logger(log_dir)
 
     # 1. 数据
     train_data = FlowerDataset(root_dir=train_dir, transform=cfg.transforms_train)
