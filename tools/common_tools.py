@@ -1,3 +1,4 @@
+from datetime import datetime
 import logging
 import random
 import numpy as np
@@ -180,6 +181,21 @@ def get_model(cfg, cls_num, logger):
     else:
         raise ValueError(f"Unsupported model: {model_name}")
 
-
-
     return model
+
+def make_logger(out_dir):
+    """
+    在out_dir文件夹下以当前时间命名，创建日志文件夹，并创建logger用于记录信息
+    :param out_dir: str
+    :return:
+    """
+    now_time = datetime.now()
+    time_str = datetime.strftime(now_time, '%m-%d_%H-%M')
+    log_dir = os.path.join(out_dir, time_str)  # 根据config中的创建时间作为文件夹名
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+    # 创建logger
+    path_log = os.path.join(log_dir, "log.log")
+    logger = Logger(path_log)
+    logger = logger.init_logger()
+    return logger, log_dir
